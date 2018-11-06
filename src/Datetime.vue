@@ -134,8 +134,6 @@ export default {
 	data() {
 		let date = this.getDate();
 
-		console.log(date);
-
 		return {
 			isOpen: false,
 			show: null,
