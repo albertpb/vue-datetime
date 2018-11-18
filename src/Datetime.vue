@@ -67,68 +67,68 @@ export default {
 	props: {
 		value: {
 			type: String,
-			required: true
+			required: true,
 		},
 		type: {
 			type: String,
-			default: 'date'
+			default: 'date',
 		},
 		inputFormat: {
 			type: String,
-			default: ''
+			default: '',
 		},
 		wrapperClass: {
-			type: String
+			type: String,
 		},
 		inputClass: {
-			type: String
+			type: String,
 		},
 		placeholder: {
-			type: String
+			type: String,
 		},
 		momentLocale: {
 			type: String,
-			default: null
+			default: null,
 		},
 		minDate: {
 			type: String,
-			default: null
+			default: null,
 		},
 		maxDate: {
 			type: String,
-			default: null
+			default: null,
 		},
 		disabledDates: {
 			type: Array,
 			default() {
 				return [];
-			}
+			},
 		},
 		mondayFirst: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		autoContinue: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		autoClose: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		required: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		i18n: {
 			type: Object,
 			default() {
 				return {
 					ok: 'Ok',
-					cancel: 'Cancel'
+					cancel: 'Cancel',
 				};
-			}
-		}
+			},
+		},
 	},
 
 	data() {
@@ -143,9 +143,9 @@ export default {
 			typeFlow: typeFlowFactory(
 				this.type,
 				this,
-				date ? date.clone() : moment().locale(this.momentLocale)
+				date ? date.clone() : moment().locale(this.momentLocale),
 			),
-			datePickerItemHeight: null
+			datePickerItemHeight: null,
 		};
 	},
 
@@ -155,13 +155,13 @@ export default {
 
 			if (this.typeFlow) {
 				this.typeFlow.setDate(
-					this.date ? this.date.clone() : moment().locale(this.momentLocale)
+					this.date ? this.date.clone() : moment().locale(this.momentLocale),
 				);
 			}
 
 			this.newDate = this.getNewDate();
 			this.currentMonthDate = this.getCurrentMonthDate();
-		}
+		},
 	},
 
 	created() {
@@ -174,7 +174,7 @@ export default {
 		inputValue() {
 			return this.typeFlow.format(
 				this.date,
-				this.inputFormat || this.typeFlow.inputFormat()
+				this.inputFormat || this.typeFlow.inputFormat(),
 			);
 		},
 		newDay() {
@@ -204,7 +204,7 @@ export default {
 					selected: day ? isCurrentMonth && day === this.newDate.date() : false,
 					disabled: day
 						? this.isDisabled(moment([currentYear, currentMonth, day]))
-						: true
+						: true,
 				};
 			});
 		},
@@ -212,7 +212,7 @@ export default {
 			return util.years().map(year => {
 				return {
 					number: year,
-					selected: year === this.newDate.year()
+					selected: year === this.newDate.year(),
 				};
 			});
 		},
@@ -220,7 +220,7 @@ export default {
 			return util.hours().map(hour => {
 				return {
 					number: hour,
-					selected: parseInt(hour) === parseInt(this.newDate.hour())
+					selected: parseInt(hour) === parseInt(this.newDate.hour()),
 				};
 			});
 		},
@@ -228,7 +228,7 @@ export default {
 			return util.minutes().map(minute => {
 				return {
 					number: minute,
-					selected: parseInt(minute) === this.newDate.minute()
+					selected: parseInt(minute) === this.newDate.minute(),
 				};
 			});
 		},
@@ -245,15 +245,13 @@ export default {
 				this.datePickerItemHeight;
 
 			return height ? height + 'px' : 'auto';
-		}
+		},
 	},
 
 	methods: {
 		getDate() {
 			return this.value.length
-				? moment(this.value, this.type === 'time' ? 'HH:mm' : null).locale(
-						this.momentLocale
-				  )
+				? moment(this.value).locale(this.momentLocale)
 				: null;
 		},
 		getNewDate() {
@@ -269,7 +267,7 @@ export default {
 		},
 		getCurrentMonthDate() {
 			return moment([this.newDate.year(), this.newDate.month(), 1]).locale(
-				this.momentLocale
+				this.momentLocale,
 			);
 		},
 		open() {
@@ -309,7 +307,7 @@ export default {
 
 			this.$nextTick(() => {
 				this.datePickerItemHeight = this.$refs.popupBody.getElementsByClassName(
-					'vdatetime-popup__date-picker__item'
+					'vdatetime-popup__date-picker__item',
 				)[7].offsetHeight;
 			});
 		},
@@ -318,10 +316,10 @@ export default {
 
 			this.$nextTick(() => {
 				let selectedHour = this.$refs.hourPicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected'
+					'.vdatetime-popup__list-picker__item--selected',
 				);
 				let selectedMinute = this.$refs.minutePicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected'
+					'.vdatetime-popup__list-picker__item--selected',
 				);
 
 				this.$refs.hourPicker.scrollTop = selectedHour
@@ -337,7 +335,7 @@ export default {
 
 			this.$nextTick(() => {
 				let selectedYear = this.$refs.yearPicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected'
+					'.vdatetime-popup__list-picker__item--selected',
 				);
 
 				this.$refs.yearPicker.scrollTop = selectedYear
@@ -365,7 +363,7 @@ export default {
 			this.typeFlow.selectDay(
 				this.currentMonthDate.year(),
 				this.currentMonthDate.month(),
-				day
+				day,
 			);
 			this.newDate = this.typeFlow.date.clone();
 		},
@@ -386,8 +384,8 @@ export default {
 						return date.isBetween(dates[0], dates[1], 'day', '[)');
 					}) !== undefined)
 			);
-		}
-	}
+		},
+	},
 };
 </script>
 
