@@ -172,10 +172,12 @@ export default {
 
 	computed: {
 		inputValue() {
-			return this.typeFlow.format(
-				this.date,
-				this.inputFormat || this.typeFlow.inputFormat(),
-			);
+			return this.date
+				? this.typeFlow.format(
+						this.date,
+						this.inputFormat || this.typeFlow.inputFormat(),
+				  )
+				: '';
 		},
 		newDay() {
 			return this.newDate.format('ddd, MMM D');
@@ -250,7 +252,7 @@ export default {
 
 	methods: {
 		getDate() {
-			return this.value.length
+			return moment(this.value).isValid()
 				? moment(this.value).locale(this.momentLocale)
 				: null;
 		},
