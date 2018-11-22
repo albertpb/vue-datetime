@@ -48,6 +48,7 @@
             </div>
           </div>
           <div class="vdatetime-popup__actions">
+            <div class="vdatetime-popup__actions__button" @click="remove">{{ i18n.remove }}</div>
             <div class="vdatetime-popup__actions__button" @click="close(false)">{{ i18n.cancel }}</div>
             <div class="vdatetime-popup__actions__button" @click="ok">{{ i18n.ok }}</div>
           </div>
@@ -58,583 +59,591 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import moment from 'moment';
-import * as util from './util';
-import typeFlowFactory from './TypeFlows';
+import Vue from "vue";
+import moment from "moment";
+import * as util from "./util";
+import typeFlowFactory from "./TypeFlows";
 
 export default {
-	props: {
-		value: {
-			type: String,
-			required: true,
-		},
-		type: {
-			type: String,
-			default: 'date',
-		},
-		inputFormat: {
-			type: String,
-			default: '',
-		},
-		wrapperClass: {
-			type: String,
-		},
-		inputClass: {
-			type: String,
-		},
-		placeholder: {
-			type: String,
-		},
-		momentLocale: {
-			type: String,
-			default: null,
-		},
-		minDate: {
-			type: String,
-			default: null,
-		},
-		maxDate: {
-			type: String,
-			default: null,
-		},
-		disabledDates: {
-			type: Array,
-			default() {
-				return [];
-			},
-		},
-		mondayFirst: {
-			type: Boolean,
-			default: false,
-		},
-		autoContinue: {
-			type: Boolean,
-			default: false,
-		},
-		autoClose: {
-			type: Boolean,
-			default: false,
-		},
-		required: {
-			type: Boolean,
-			default: false,
-		},
-		i18n: {
-			type: Object,
-			default() {
-				return {
-					ok: 'Ok',
-					cancel: 'Cancel',
-				};
-			},
-		},
-	},
+  props: {
+    value: {
+      required: true,
+      validator: prop => typeof prop === "string" || prop === null
+    },
+    type: {
+      type: String,
+      default: "date"
+    },
+    inputFormat: {
+      type: String,
+      default: ""
+    },
+    wrapperClass: {
+      type: String
+    },
+    inputClass: {
+      type: String
+    },
+    placeholder: {
+      type: String
+    },
+    momentLocale: {
+      type: String,
+      default: null
+    },
+    minDate: {
+      type: String,
+      default: null
+    },
+    maxDate: {
+      type: String,
+      default: null
+    },
+    disabledDates: {
+      type: Array,
+      default() {
+        return [];
+      }
+    },
+    mondayFirst: {
+      type: Boolean,
+      default: false
+    },
+    autoContinue: {
+      type: Boolean,
+      default: false
+    },
+    autoClose: {
+      type: Boolean,
+      default: false
+    },
+    required: {
+      type: Boolean,
+      default: false
+    },
+    i18n: {
+      type: Object,
+      default() {
+        return {
+          remove: "Remove",
+          ok: "Ok",
+          cancel: "Cancel"
+        };
+      }
+    }
+  },
 
-	data() {
-		let date = this.getDate();
+  data() {
+    let date = this.getDate();
 
-		return {
-			isOpen: false,
-			show: null,
-			date: date,
-			newDate: null,
-			currentMonthDate: null,
-			typeFlow: typeFlowFactory(
-				this.type,
-				this,
-				date ? date.clone() : moment().locale(this.momentLocale),
-			),
-			datePickerItemHeight: null,
-		};
-	},
+    return {
+      isOpen: false,
+      show: null,
+      date: date,
+      newDate: null,
+      currentMonthDate: null,
+      typeFlow: typeFlowFactory(
+        this.type,
+        this,
+        date ? date.clone() : moment().locale(this.momentLocale)
+      ),
+      datePickerItemHeight: null
+    };
+  },
 
-	watch: {
-		value(newValue) {
-			this.date = this.getDate();
+  watch: {
+    value(newValue) {
+      this.date = this.getDate();
 
-			if (this.typeFlow) {
-				this.typeFlow.setDate(
-					this.date ? this.date.clone() : moment().locale(this.momentLocale),
-				);
-			}
+      if (this.typeFlow) {
+        this.typeFlow.setDate(
+          this.date ? this.date.clone() : moment().locale(this.momentLocale)
+        );
+      }
 
-			this.newDate = this.getNewDate();
-			this.currentMonthDate = this.getCurrentMonthDate();
-		},
-	},
+      this.newDate = this.getNewDate();
+      this.currentMonthDate = this.getCurrentMonthDate();
+    }
+  },
 
-	created() {
-		if (this.date) {
-			this.$emit('input', this.typeFlow.isoDate());
-		}
-	},
+  created() {
+    if (this.date) {
+      this.$emit("input", this.typeFlow.isoDate());
+    }
+  },
 
-	computed: {
-		inputValue() {
-			return this.date
-				? this.typeFlow.format(
-						this.date,
-						this.inputFormat || this.typeFlow.inputFormat(),
-				  )
-				: '';
-		},
-		newDay() {
-			return this.newDate.format('ddd, MMM D');
-		},
-		newYear() {
-			return this.newDate.format('YYYY');
-		},
-		currentMonth() {
-			return this.currentMonthDate.format('MMMM YYYY');
-		},
-		weekdays() {
-			return util.weekdays(this.momentLocale, this.mondayFirst);
-		},
-		currentMonthDays() {
-			const currentYear = this.currentMonthDate.year();
-			const currentMonth = this.currentMonthDate.month();
-			const isCurrentMonth =
-				currentYear === this.newDate.year() &&
-				currentMonth === this.newDate.month();
+  computed: {
+    inputValue() {
+      return this.date
+        ? this.typeFlow.format(
+            this.date,
+            this.inputFormat || this.typeFlow.inputFormat()
+          )
+        : "";
+    },
+    newDay() {
+      return this.newDate.format("ddd, MMM D");
+    },
+    newYear() {
+      return this.newDate.format("YYYY");
+    },
+    currentMonth() {
+      return this.currentMonthDate.format("MMMM YYYY");
+    },
+    weekdays() {
+      return util.weekdays(this.momentLocale, this.mondayFirst);
+    },
+    currentMonthDays() {
+      const currentYear = this.currentMonthDate.year();
+      const currentMonth = this.currentMonthDate.month();
+      const isCurrentMonth =
+        currentYear === this.newDate.year() &&
+        currentMonth === this.newDate.month();
 
-			let days = util.monthDays(currentMonth, currentYear, this.mondayFirst);
+      let days = util.monthDays(currentMonth, currentYear, this.mondayFirst);
 
-			return days.map(day => {
-				return {
-					number: day || '',
-					selected: day ? isCurrentMonth && day === this.newDate.date() : false,
-					disabled: day
-						? this.isDisabled(moment([currentYear, currentMonth, day]))
-						: true,
-				};
-			});
-		},
-		years() {
-			return util.years().map(year => {
-				return {
-					number: year,
-					selected: year === this.newDate.year(),
-				};
-			});
-		},
-		hours() {
-			return util.hours().map(hour => {
-				return {
-					number: hour,
-					selected: parseInt(hour) === parseInt(this.newDate.hour()),
-				};
-			});
-		},
-		minutes() {
-			return util.minutes().map(minute => {
-				return {
-					number: minute,
-					selected: parseInt(minute) === this.newDate.minute(),
-				};
-			});
-		},
-		disabledDatesRanges() {
-			return this.disabledDates.map(function(item) {
-				return Array.isArray(item)
-					? [moment(item[0]), moment(item[1])]
-					: [moment(item), moment(item).add(1, 'day')];
-			});
-		},
-		datePickerHeight() {
-			let height =
-				(Math.ceil(this.currentMonthDays.length / 7) + 1) *
-				this.datePickerItemHeight;
+      return days.map(day => {
+        return {
+          number: day || "",
+          selected: day ? isCurrentMonth && day === this.newDate.date() : false,
+          disabled: day
+            ? this.isDisabled(moment([currentYear, currentMonth, day]))
+            : true
+        };
+      });
+    },
+    years() {
+      return util.years().map(year => {
+        return {
+          number: year,
+          selected: year === this.newDate.year()
+        };
+      });
+    },
+    hours() {
+      return util.hours().map(hour => {
+        return {
+          number: hour,
+          selected: parseInt(hour) === parseInt(this.newDate.hour())
+        };
+      });
+    },
+    minutes() {
+      return util.minutes().map(minute => {
+        return {
+          number: minute,
+          selected: parseInt(minute) === this.newDate.minute()
+        };
+      });
+    },
+    disabledDatesRanges() {
+      return this.disabledDates.map(function(item) {
+        return Array.isArray(item)
+          ? [moment(item[0]), moment(item[1])]
+          : [moment(item), moment(item).add(1, "day")];
+      });
+    },
+    datePickerHeight() {
+      let height =
+        (Math.ceil(this.currentMonthDays.length / 7) + 1) *
+        this.datePickerItemHeight;
 
-			return height ? height + 'px' : 'auto';
-		},
-	},
+      return height ? height + "px" : "auto";
+    }
+  },
 
-	methods: {
-		getDate() {
-			return moment(this.value).isValid()
-				? moment(this.value).locale(this.momentLocale)
-				: null;
-		},
-		getNewDate() {
-			let newDate = this.date
-				? this.date.clone()
-				: moment().locale(this.momentLocale);
+  methods: {
+    getDate() {
+      return moment(this.value).isValid()
+        ? moment(this.value).locale(this.momentLocale)
+        : null;
+    },
+    getNewDate() {
+      let newDate = this.date
+        ? this.date.clone()
+        : moment().locale(this.momentLocale);
 
-			for (let i = 0; i < 1e5 && this.isDisabled(newDate); i++) {
-				newDate = newDate.clone().add(1, 'day');
-			}
+      for (let i = 0; i < 1e5 && this.isDisabled(newDate); i++) {
+        newDate = newDate.clone().add(1, "day");
+      }
 
-			return newDate;
-		},
-		getCurrentMonthDate() {
-			return moment([this.newDate.year(), this.newDate.month(), 1]).locale(
-				this.momentLocale,
-			);
-		},
-		open() {
-			this.newDate = this.getNewDate();
-			this.currentMonthDate = this.getCurrentMonthDate();
+      return newDate;
+    },
+    getCurrentMonthDate() {
+      return moment([this.newDate.year(), this.newDate.month(), 1]).locale(
+        this.momentLocale
+      );
+    },
+    open() {
+      this.newDate = this.getNewDate();
+      this.currentMonthDate = this.getCurrentMonthDate();
 
-			this.isOpen = true;
-			this.$refs.input.blur();
-			this.typeFlow.open();
+      this.isOpen = true;
+      this.$refs.input.blur();
+      this.typeFlow.open();
 
-			this.$nextTick(() => {
-				let height = this.$refs.popupBody.clientHeight - 25 + 'px';
-				this.$refs.hourPicker.style.height = height;
-				this.$refs.minutePicker.style.height = height;
-				this.$refs.yearPicker.style.height = height;
-			});
-		},
-		close(save = true) {
-			this.typeFlow.close();
+      this.$nextTick(() => {
+        let height = this.$refs.popupBody.clientHeight - 25 + "px";
+        this.$refs.hourPicker.style.height = height;
+        this.$refs.minutePicker.style.height = height;
+        this.$refs.yearPicker.style.height = height;
+      });
+    },
+    close(save = true) {
+      this.typeFlow.close();
 
-			if (save === true) {
-				this.date = this.typeFlow.date.clone();
-				this.$emit('input', this.typeFlow.isoDate());
-			}
+      if (save === true) {
+        this.date = this.typeFlow.date.clone();
+        this.$emit("input", this.typeFlow.isoDate());
+      }
 
-			this.isOpen = false;
-		},
-		ok() {
-			if (this.show === 'year') {
-				this.showDatePicker();
-			} else {
-				this.typeFlow.ok();
-			}
-		},
-		showDatePicker() {
-			this.show = 'date';
+      this.isOpen = false;
+    },
+    ok() {
+      if (this.show === "year") {
+        this.showDatePicker();
+      } else {
+        this.typeFlow.ok();
+      }
+    },
+    remove() {
+      this.date = null;
 
-			this.$nextTick(() => {
-				this.datePickerItemHeight = this.$refs.popupBody.getElementsByClassName(
-					'vdatetime-popup__date-picker__item',
-				)[7].offsetHeight;
-			});
-		},
-		showTimePicker() {
-			this.show = 'time';
+      this.$emit("input", null);
 
-			this.$nextTick(() => {
-				let selectedHour = this.$refs.hourPicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected',
-				);
-				let selectedMinute = this.$refs.minutePicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected',
-				);
+      this.isOpen = false;
+    },
+    showDatePicker() {
+      this.show = "date";
 
-				this.$refs.hourPicker.scrollTop = selectedHour
-					? selectedHour.offsetTop - 250
-					: 0;
-				this.$refs.minutePicker.scrollTop = selectedMinute
-					? selectedMinute.offsetTop - 250
-					: 0;
-			});
-		},
-		showYearPicker() {
-			this.show = 'year';
+      this.$nextTick(() => {
+        this.datePickerItemHeight = this.$refs.popupBody.getElementsByClassName(
+          "vdatetime-popup__date-picker__item"
+        )[7].offsetHeight;
+      });
+    },
+    showTimePicker() {
+      this.show = "time";
 
-			this.$nextTick(() => {
-				let selectedYear = this.$refs.yearPicker.querySelector(
-					'.vdatetime-popup__list-picker__item--selected',
-				);
+      this.$nextTick(() => {
+        let selectedHour = this.$refs.hourPicker.querySelector(
+          ".vdatetime-popup__list-picker__item--selected"
+        );
+        let selectedMinute = this.$refs.minutePicker.querySelector(
+          ".vdatetime-popup__list-picker__item--selected"
+        );
 
-				this.$refs.yearPicker.scrollTop = selectedYear
-					? selectedYear.offsetTop - 250
-					: 0;
-			});
-		},
-		previousMonth() {
-			this.currentMonthDate = this.currentMonthDate
-				.clone()
-				.subtract(1, 'month');
-		},
-		nextMonth() {
-			this.currentMonthDate = this.currentMonthDate.clone().add(1, 'month');
-		},
-		selectYear(year) {
-			this.currentMonthDate = this.currentMonthDate.clone().year(year);
-			this.newDate = this.newDate.clone().year(year);
+        this.$refs.hourPicker.scrollTop = selectedHour
+          ? selectedHour.offsetTop - 250
+          : 0;
+        this.$refs.minutePicker.scrollTop = selectedMinute
+          ? selectedMinute.offsetTop - 250
+          : 0;
+      });
+    },
+    showYearPicker() {
+      this.show = "year";
 
-			if (this.autoContinue) {
-				this.showDatePicker();
-			}
-		},
-		selectDay(day) {
-			this.typeFlow.selectDay(
-				this.currentMonthDate.year(),
-				this.currentMonthDate.month(),
-				day,
-			);
-			this.newDate = this.typeFlow.date.clone();
-		},
-		selectHour(hour) {
-			this.typeFlow.selectHour(hour);
-			this.newDate = this.typeFlow.date.clone();
-		},
-		selectMinute(minute) {
-			this.typeFlow.selectMinute(minute);
-			this.newDate = this.typeFlow.date.clone();
-		},
-		isDisabled(date) {
-			return (
-				(this.minDate && date.isBefore(this.minDate, 'day')) ||
-				(this.maxDate && date.isAfter(this.maxDate, 'day')) ||
-				(this.disabledDatesRanges &&
-					this.disabledDatesRanges.find(function(dates) {
-						return date.isBetween(dates[0], dates[1], 'day', '[)');
-					}) !== undefined)
-			);
-		},
-	},
+      this.$nextTick(() => {
+        let selectedYear = this.$refs.yearPicker.querySelector(
+          ".vdatetime-popup__list-picker__item--selected"
+        );
+
+        this.$refs.yearPicker.scrollTop = selectedYear
+          ? selectedYear.offsetTop - 250
+          : 0;
+      });
+    },
+    previousMonth() {
+      this.currentMonthDate = this.currentMonthDate
+        .clone()
+        .subtract(1, "month");
+    },
+    nextMonth() {
+      this.currentMonthDate = this.currentMonthDate.clone().add(1, "month");
+    },
+    selectYear(year) {
+      this.currentMonthDate = this.currentMonthDate.clone().year(year);
+      this.newDate = this.newDate.clone().year(year);
+
+      if (this.autoContinue) {
+        this.showDatePicker();
+      }
+    },
+    selectDay(day) {
+      this.typeFlow.selectDay(
+        this.currentMonthDate.year(),
+        this.currentMonthDate.month(),
+        day
+      );
+      this.newDate = this.typeFlow.date.clone();
+    },
+    selectHour(hour) {
+      this.typeFlow.selectHour(hour);
+      this.newDate = this.typeFlow.date.clone();
+    },
+    selectMinute(minute) {
+      this.typeFlow.selectMinute(minute);
+      this.newDate = this.typeFlow.date.clone();
+    },
+    isDisabled(date) {
+      return (
+        (this.minDate && date.isBefore(this.minDate, "day")) ||
+        (this.maxDate && date.isAfter(this.maxDate, "day")) ||
+        (this.disabledDatesRanges &&
+          this.disabledDatesRanges.find(function(dates) {
+            return date.isBetween(dates[0], dates[1], "day", "[)");
+          }) !== undefined)
+      );
+    }
+  }
 };
 </script>
 
 <style lang="scss">
 .vdatetime {
-	> * {
-		box-sizing: border-box;
-	}
+  > * {
+    box-sizing: border-box;
+  }
 }
 
 .vdatetime-fade-enter-active,
 .vdatetime-fade-leave-active {
-	position: absolute;
-	z-index: 999;
-	transition: opacity 0.4s;
+  position: absolute;
+  z-index: 999;
+  transition: opacity 0.4s;
 }
 
 .vdatetime-fade-enter,
 .vdatetime-fade-leave-to {
-	opacity: 0;
+  opacity: 0;
 }
 
 .vdatetime-overlay {
-	z-index: 999;
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background: rgba(0, 0, 0, 0.5);
-	transition: opacity 0.5s;
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  transition: opacity 0.5s;
 }
 
 .vdatetime-popup {
-	z-index: 1000;
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	width: 340px;
-	max-width: calc(100% - 30px);
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
-	color: #444;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-		'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-		sans-serif;
-	background: #fff;
-	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  z-index: 1000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  max-width: calc(100% - 30px);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  color: #444;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  background: #fff;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .vdatetime-popup__header {
-	padding: 15px 30px;
-	background: #3f51b5;
-	color: #fff;
-	font-size: 32px;
-	text-transform: capitalize;
+  padding: 15px 30px;
+  background: #3f51b5;
+  color: #fff;
+  font-size: 32px;
+  text-transform: capitalize;
 }
 
 .vdatetime-popup__year {
-	display: block;
-	font-weight: 300;
-	font-size: 14px;
-	opacity: 0.7;
-	cursor: pointer;
-	transition: opacity 0.3s;
+  display: block;
+  font-weight: 300;
+  font-size: 14px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.3s;
 
-	&:hover {
-		opacity: 1;
-	}
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .vdatetime-popup__body {
-	padding: 15px 0 10px;
-	font-size: 16px;
-	user-select: none;
+  padding: 15px 0 10px;
+  font-size: 16px;
+  user-select: none;
 }
 
 .vdatetime-popup__month-selector {
-	position: relative;
-	padding: 0 30px;
-	margin-bottom: 15px;
-	width: 100%;
+  position: relative;
+  padding: 0 30px;
+  margin-bottom: 15px;
+  width: 100%;
 }
 
 .vdatetime-popup__month-selector__previous,
 .vdatetime-popup__month-selector__next {
-	position: absolute;
-	top: 0;
-	padding: 0 5px;
-	width: 8px;
-	cursor: pointer;
+  position: absolute;
+  top: 0;
+  padding: 0 5px;
+  width: 8px;
+  cursor: pointer;
 
-	svg {
-		width: 8px;
+  svg {
+    width: 8px;
 
-		path {
-			transition: stroke 0.3s;
-		}
-	}
+    path {
+      transition: stroke 0.3s;
+    }
+  }
 
-	&:hover svg path {
-		stroke: #888;
-	}
+  &:hover svg path {
+    stroke: #888;
+  }
 }
 
 .vdatetime-popup__month-selector__previous {
-	left: 25px;
+  left: 25px;
 }
 
 .vdatetime-popup__month-selector__next {
-	right: 25px;
-	transform: scaleX(-1);
+  right: 25px;
+  transform: scaleX(-1);
 }
 
 .vdatetime-popup__month-selector__current {
-	text-align: center;
-	text-transform: capitalize;
+  text-align: center;
+  text-transform: capitalize;
 }
 
 .vdatetime-popup__date-picker {
-	padding: 0 20px;
-	transition: height 0.2s;
+  padding: 0 20px;
+  transition: height 0.2s;
 }
 
 .vdatetime-popup__date-picker__item {
-	display: inline-block;
-	width: #{100%/7};
-	line-height: 36px;
-	text-align: center;
-	font-size: 15px;
-	font-weight: 300;
-	cursor: pointer;
+  display: inline-block;
+  width: #{100%/7};
+  line-height: 36px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 300;
+  cursor: pointer;
 
-	> span {
-		display: block;
-		width: 100%;
-		position: relative;
-		height: 0;
-		padding: 0 0 100% 0;
-		overflow: hidden;
+  > span {
+    display: block;
+    width: 100%;
+    position: relative;
+    height: 0;
+    padding: 0 0 100% 0;
+    overflow: hidden;
 
-		> span {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			position: absolute;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			border: 0;
-			border-radius: 50%;
-			transition: background-color 0.3s, color 0.3s;
-		}
-	}
+    > span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border: 0;
+      border-radius: 50%;
+      transition: background-color 0.3s, color 0.3s;
+    }
+  }
 }
 
 .vdatetime-popup__date-picker__item:hover > span > span {
-	background: #eee;
+  background: #eee;
 }
 
 .vdatetime-popup__date-picker__item--selected {
-	& > span > span,
-	&:hover > span > span {
-		color: #fff;
-		background: #3f51b5;
-	}
+  & > span > span,
+  &:hover > span > span {
+    color: #fff;
+    background: #3f51b5;
+  }
 }
 
 .vdatetime-popup__date-picker__item--header {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .vdatetime-popup__date-picker__item--disabled {
-	opacity: 0.4;
-	cursor: default;
+  opacity: 0.4;
+  cursor: default;
 
-	&:hover > span > span {
-		color: inherit;
-		background: transparent;
-	}
+  &:hover > span > span {
+    color: inherit;
+    background: transparent;
+  }
 }
 
 .vdatetime-popup__list-picker-wrapper {
-	&:after {
-		content: '';
-		display: table;
-		clear: both;
-	}
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
 }
 
 .vdatetime-popup__list-picker {
-	height: 305px;
-	overflow-y: scroll;
+  height: 305px;
+  overflow-y: scroll;
 
-	&::-webkit-scrollbar {
-		width: 3px;
-	}
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
 
-	&::-webkit-scrollbar-track {
-		background: #efefef;
-	}
+  &::-webkit-scrollbar-track {
+    background: #efefef;
+  }
 
-	&::-webkit-scrollbar-thumb {
-		background: #ccc;
-	}
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+  }
 }
 
 .vdatetime-popup__list-picker--half {
-	float: left;
-	width: 50%;
+  float: left;
+  width: 50%;
 }
 
 .vdatetime-popup__list-picker__item {
-	padding: 10px 0;
-	font-size: 20px;
-	text-align: center;
-	cursor: pointer;
-	transition: font-size 0.3s;
+  padding: 10px 0;
+  font-size: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: font-size 0.3s;
 }
 
 .vdatetime-popup__list-picker__item:hover {
-	font-size: 32px;
+  font-size: 32px;
 }
 
 .vdatetime-popup__list-picker__item--selected {
-	color: #3f51b5;
-	font-size: 32px;
+  color: #3f51b5;
+  font-size: 32px;
 }
 
 .vdatetime-popup__actions {
-	padding: 0 20px 10px 30px;
-	text-align: right;
+  padding: 0 20px 10px 30px;
+  text-align: right;
 }
 
 .vdatetime-popup__actions__button {
-	display: inline-block;
-	border: none;
-	padding: 10px 20px;
-	background: transparent;
-	font-size: 16px;
-	color: #3f51b5;
-	cursor: pointer;
-	transition: color 0.3s;
+  display: inline-block;
+  border: none;
+  padding: 10px 20px;
+  background: transparent;
+  font-size: 16px;
+  color: #3f51b5;
+  cursor: pointer;
+  transition: color 0.3s;
 
-	&:hover {
-		color: #444;
-	}
+  &:hover {
+    color: #444;
+  }
 }
 </style>
