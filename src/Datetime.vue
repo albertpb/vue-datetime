@@ -48,7 +48,7 @@
             </div>
           </div>
           <div class="vdatetime-popup__actions">
-            <div class="vdatetime-popup__actions__button" @click="remove">{{ i18n.remove }}</div>
+            <div v-if="i18n.remove" class="vdatetime-popup__actions__button" @click="remove">{{ i18n.remove }}</div>
             <div class="vdatetime-popup__actions__button" @click="close(false)">{{ i18n.cancel }}</div>
             <div class="vdatetime-popup__actions__button" @click="ok">{{ i18n.ok }}</div>
           </div>
