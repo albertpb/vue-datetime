@@ -258,8 +258,8 @@ export default {
 
   methods: {
     getDate() {
-      return moment(this.value).isValid()
-        ? moment(this.value).locale(this.momentLocale)
+      return moment(this.value, this.inputFormat).isValid()
+        ? moment(this.value, this.inputFormat).locale(this.momentLocale)
         : null;
     },
     getNewDate() {
