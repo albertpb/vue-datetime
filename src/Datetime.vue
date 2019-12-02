@@ -527,7 +527,7 @@ export default {
 
 .vdatetime-popup__date-picker__item {
 	display: inline-block;
-	width: #{100%/7};
+	width: calc(100% / 7);
 	line-height: 36px;
 	text-align: center;
 	font-size: 15px;
